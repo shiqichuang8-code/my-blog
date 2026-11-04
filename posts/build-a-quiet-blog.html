@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>用原生 HTML 和 CSS 搭一个安静的博客 · 墨记</title>
+    <meta name="description" content="没有框架、没有构建、没有依赖——只有几个文件和一点耐心。聊聊为什么「做减法」反而更难。" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231b1d21'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' fill='none' stroke='%23fbfaf7' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("moji-theme");
+          document.documentElement.dataset.theme =
+            saved ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+
+  <body data-page="post" data-slug="build-a-quiet-blog" data-root="../">
+    <div class="progress" aria-hidden="true">
+      <span class="progress__bar" id="progressBar"></span>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap site-header__inner">
+        <a class="brand" href="../index.html" aria-label="墨记 · 返回首页">
+          <span class="brand__mark" aria-hidden="true">墨</span>
+          <span class="brand__name">墨记</span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a class="nav__link" href="../index.html" aria-current="page">文章</a>
+          <a class="nav__link" href="../about.html">关于</a>
+          <a class="nav__link" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" type="button" id="themeToggle" aria-label="切换深色模式">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap wrap--narrow">
+      <a class="back-link" href="../index.html">
+        <span aria-hidden="true">←</span> 返回文章列表
+      </a>
+
+      <article>
+        <header class="post-header">
+          <div class="post-header__meta">
+            <time datetime="2026-09-28">2026 年 9 月 28 日</time>
+            <span class="post-card__dot" aria-hidden="true"></span>
+            <span data-readtime>8 分钟阅读</span>
+          </div>
+          <h1>用原生 HTML 和 CSS 搭一个安静的博客</h1>
+          <p class="post-header__lead">
+            没有框架、没有构建、没有依赖——只有几个文件，和一点耐心。
+          </p>
+          <div class="post-header__tags" data-post-tags></div>
+        </header>
+
+        <div class="prose">
+          <p>
+            前段时间我把博客从某个静态站点生成器上搬了下来，换成了最原始的方式：手写 HTML 和 CSS。
+          </p>
+          <p>
+            朋友问为什么，我说不上来特别宏大的理由。大概是某天打开 <code>node_modules</code>，看见两千多个文件夹，突然觉得有点荒谬——我只是想写点字。
+          </p>
+
+          <h2>从减法开始</h2>
+          <p>这个站点的全部依赖是零。目录大概长这样：</p>
+          <pre><code>.
+├── index.html
+├── about.html
+├── posts/
+│   └── *.html
+└── assets/
+    ├── style.css
+    ├── blog.js
+    └── app.js</code></pre>
+          <p>
+            没有打包，没有热更新，没有配置文件。改一行 CSS，刷新页面就能看到效果。想加一篇文章，复制一个文件，改掉标题和正文，再在 <code>blog.js</code> 里补一条记录。
+          </p>
+          <p>
+            少掉的那些东西——插件、主题、构建管线——曾经让我觉得强大，后来发现它们主要是让我在「配置博客」这件事上消耗时间，而不是「写博客」。
+          </p>
+
+          <h2>用 CSS 变量管理颜色</h2>
+          <p>深浅色切换最省事的做法，是把所有颜色抽成变量：</p>
+          <pre><code class="language-css">:root {
+  --bg: #fbfaf7;
+  --text: #1b1d21;
+  --accent: #bf5b3d;
+}
+
+[data-theme="dark"] {
+  --bg: #101113;
+  --text: #e9e7e2;
+  --accent: #e8825f;
+}</code></pre>
+          <p>
+            然后在 <code>&lt;html&gt;</code> 上切换 <code>data-theme</code>，整站的颜色就跟着变了。不需要写两套样式，也不需要 JS 去逐个修改元素。
+          </p>
+
+          <h2>别让页面闪一下</h2>
+          <p>
+            如果主题是在 JS 加载完之后才设置的，用户会先看到一秒白底，再跳到深色——很难看。
+          </p>
+          <p>解决办法是：把判断逻辑放进 <code>&lt;head&gt;</code> 里，在样式表之前执行。</p>
+          <pre><code class="language-html">&lt;script&gt;
+  (function () {
+    var saved = localStorage.getItem("theme");
+    document.documentElement.dataset.theme =
+      saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  })();
+&lt;/script&gt;</code></pre>
+          <p>这段代码很短，但它决定了第一眼的感觉。</p>
+
+          <h2>留白比装饰更难</h2>
+          <p>真正花时间的地方不是功能，是比例。</p>
+          <p>
+            标题多大、行高多少、卡片之间留多少空隙、正文一行多少字——这些没有标准答案，只能一点一点调。调到最后你会发现，所谓「简洁」，不是少了什么，而是每一处都刚好。
+          </p>
+          <p>
+            我删掉了很多东西：阴影、渐变、动画、分割线、装饰性图标。留下的每一样都得解释得清自己为什么存在。
+          </p>
+
+          <h2>最后是部署</h2>
+          <p>静态站点最舒服的一点：扔到任何地方都能跑。</p>
+          <ul>
+            <li><strong>GitHub Pages</strong>：推上去就有地址</li>
+            <li><strong>Vercel / Netlify</strong>：连仓库，自动部署</li>
+            <li><strong>自己的服务器</strong>：把文件夹拷过去就行</li>
+          </ul>
+          <p>没有数据库，没有环境变量，没有冷启动。</p>
+          <p>
+            有时候我在想，工具的意义是让人更快地抵达想法。如果一个工具让你花在工具上的时间超过了想法本身，那它可能不适合你。
+          </p>
+
+          <blockquote>
+            <p>最好的工具，是你忘记它存在的那一个。</p>
+          </blockquote>
+        </div>
+      </article>
+
+      <footer class="post-footer">
+        <div class="post-nav" id="postNav"></div>
+        <p style="margin: 2.2rem 0 0">
+          <a class="back-link" style="margin: 0" href="../index.html">
+            <span aria-hidden="true">←</span> 返回文章列表
+          </a>
+        </p>
+      </footer>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap site-footer__inner">
+        <p style="margin: 0">© <span data-year>2026</span> 墨记 · 用原生 HTML 与 CSS 手写</p>
+        <div class="site-footer__links">
+          <a href="../about.html">关于</a>
+          <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+          <a href="mailto:hello@example.com">邮件</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../assets/blog.js"></script>
+    <script src="../assets/app.js"></script>
+  </body>
+</html>
